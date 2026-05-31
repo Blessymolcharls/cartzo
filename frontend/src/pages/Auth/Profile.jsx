@@ -23,7 +23,7 @@ const Profile = () => {
 
   return (
     <div className="max-w-md mx-auto rounded-3xl bg-white p-8 shadow-lg">
-      <h1 className="text-3xl font-bold mb-4">Profile</h1>
+      <h1 className="text-3xl font-bold mb-4 text-gray-900">Profile</h1>
       {error && <ErrorMessage message={error} />}
       {success && <div className="rounded-xl bg-success-50 border border-success-200 p-4 text-success-700">{success}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -32,7 +32,7 @@ const Profile = () => {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-full rounded-xl border-gray-300 bg-gray-50 px-4 py-3 focus:border-primary-500 focus:ring-primary-500"
+            className="mt-1 block w-full rounded-xl border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 focus:border-primary-500 focus:ring-primary-500"
             required
           />
         </label>
@@ -42,7 +42,7 @@ const Profile = () => {
             type="email"
             value={email}
             disabled
-            className="mt-1 block w-full rounded-xl border-gray-300 bg-gray-100 px-4 py-3"
+            className="mt-1 block w-full rounded-xl border-gray-300 bg-gray-100 px-4 py-3 text-gray-700 cursor-not-allowed"
           />
         </label>
         <button type="submit" className="w-full rounded-xl bg-primary-600 px-4 py-3 text-white hover:bg-primary-700">

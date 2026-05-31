@@ -20,8 +20,7 @@ const Register = () => {
     try {
       await register(email, password, name);
       showNotification('Account created successfully', 'success');
-      // Using navigate to homepage without full page reload is better handled by AuthContext,
-      // but let's assume it automatically navigates on state change.
+      navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     }

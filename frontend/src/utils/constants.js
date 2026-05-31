@@ -12,7 +12,7 @@ export const ROLES = {
 
 // Currency
 export const CURRENCY = '₹';
-export const TAX_RATE = 0.18; // 18% GST
+export const TAX_RATE = 0; // Tax amount removed
 export const FREE_SHIPPING_THRESHOLD = 500; // Free shipping above 500
 export const STANDARD_SHIPPING = 50;
 

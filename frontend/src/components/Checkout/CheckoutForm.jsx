@@ -3,21 +3,45 @@ import { STORAGE_KEYS } from '../../utils/constants';
 import ManageAddresses from './ManageAddresses';
 
 const CheckoutForm = ({ onSubmit, initialData, savedAddresses = [], onManageAddresses }) => {
-  const [formData, setFormData] = useState({ street: '', city: '', state: '', zipCode: '', phone: '' });
+  const [formData, setFormData] = useState({ houseInfo: '', street: '', city: '', state: '', zipCode: '', phone: '' });
   const [errors, setErrors] = useState({});
   const [saveAddress, setSaveAddress] = useState(!!initialData);
   const [selectedAddressIndex, setSelectedAddressIndex] = useState(-1);
   const [showManage, setShowManage] = useState(false);
 
+  const fieldLabels = {
+    houseInfo: 'House No. / House Name / Office Name',
+    street: 'Street / Road / Area',
+    city: 'City',
+    state: 'State',
+    zipCode: 'ZIP Code',
+    phone: 'Phone'
+  };
+
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      setFormData({
+        houseInfo: initialData.houseInfo || '',
+        street: initialData.street || '',
+        city: initialData.city || '',
+        state: initialData.state || '',
+        zipCode: initialData.zipCode || '',
+        phone: initialData.phone || ''
+      });
     }
   }, [initialData]);
 
   useEffect(() => {
     if (selectedAddressIndex >= 0 && savedAddresses[selectedAddressIndex]) {
-      setFormData(savedAddresses[selectedAddressIndex]);
+      const addr = savedAddresses[selectedAddressIndex];
+      setFormData({
+        houseInfo: addr.houseInfo || '',
+        street: addr.street || '',
+        city: addr.city || '',
+        state: addr.state || '',
+        zipCode: addr.zipCode || '',
+        phone: addr.phone || ''
+      });
     }
   }, [selectedAddressIndex, savedAddresses]);
 
@@ -29,6 +53,7 @@ const CheckoutForm = ({ onSubmit, initialData, savedAddresses = [], onManageAddr
 
   const validate = () => {
     const validation = {};
+    if (!formData.houseInfo) validation.houseInfo = 'House No. / House Name / Office Name is required.';
     if (!formData.street) validation.street = 'Street address is required.';
     if (!formData.city) validation.city = 'City is required.';
     if (!formData.state) validation.state = 'State is required.';
@@ -67,7 +92,7 @@ const CheckoutForm = ({ onSubmit, initialData, savedAddresses = [], onManageAddr
                   className="mt-1 h-4 w-4 text-primary-600"
                 />
                 <div className="text-sm text-gray-700">
-                  <p className="font-semibold">{address.street}</p>
+                  <p className="font-semibold">{address.houseInfo ? `${address.houseInfo}, ${address.street}` : address.street}</p>
                   <p>{address.city}, {address.state} {address.zipCode}</p>
                   <p>{address.phone}</p>
                 </div>
@@ -84,14 +109,14 @@ const CheckoutForm = ({ onSubmit, initialData, savedAddresses = [], onManageAddr
         </div>
       )}
       <div className="space-y-4">
-        {['street', 'city', 'state', 'zipCode', 'phone'].map((field) => (
+        {['houseInfo', 'street', 'city', 'state', 'zipCode', 'phone'].map((field) => (
           <label key={field} className="block">
-            <span className="text-sm font-medium text-gray-700">{field === 'zipCode' ? 'ZIP Code' : field.charAt(0).toUpperCase() + field.slice(1)}</span>
+            <span className="text-sm font-medium text-gray-700">{fieldLabels[field]}</span>
             <input
               type="text"
               value={formData[field]}
               onChange={handleChange(field)}
-              className="mt-1 block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 focus:border-primary-500 focus:ring-primary-500"
+              className="mt-1 block w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500"
             />
             {errors[field] && <span className="text-sm text-error-600">{errors[field]}</span>}
           </label>

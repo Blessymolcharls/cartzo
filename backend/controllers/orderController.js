@@ -23,11 +23,11 @@ const addOrderItems = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error(`Product not found: ${item.name}`);
       }
-      if (product.stock < item.quantity) {
+      if (product.stock < item.qty) {
         res.status(400);
         throw new Error(`Insufficient stock for ${product.name}`);
       }
-      product.stock -= item.quantity;
+      product.stock -= item.qty;
       await product.save();
     }
 

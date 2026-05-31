@@ -1,9 +1,8 @@
 import React from 'react';
-import { calculateSubtotal, calculateTax, calculateShipping, calculateTotal } from '../../utils/priceCalculator';
+import { calculateSubtotal, calculateShipping, calculateTotal } from '../../utils/priceCalculator';
 
 const PaymentSummary = ({ items }) => {
   const subtotal = calculateSubtotal(items);
-  const tax = calculateTax(subtotal);
   const shipping = calculateShipping(subtotal);
   const { total } = calculateTotal(items);
 
@@ -15,10 +14,7 @@ const PaymentSummary = ({ items }) => {
           <span>Subtotal</span>
           <span>₹{subtotal}</span>
         </div>
-        <div className="flex justify-between">
-          <span>Tax</span>
-          <span>₹{tax}</span>
-        </div>
+
         <div className="flex justify-between">
           <span>Shipping</span>
           <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>

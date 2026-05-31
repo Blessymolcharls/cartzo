@@ -60,9 +60,21 @@ const Checkout = () => {
       const paymentResult = await paymentService.openRazorpay(paymentOrder.data);
 
       const orderPayload = {
-        shippingAddress: shippingData,
-        items: cartItems,
-        totalAmount: total,
+        shippingAddress: {
+          street: shippingData.houseInfo ? `${shippingData.houseInfo}, ${shippingData.street}` : shippingData.street,
+          city: shippingData.city,
+          state: shippingData.state,
+          zipCode: shippingData.zipCode,
+          country: shippingData.country || 'India',
+        },
+        orderItems: cartItems.map((item) => ({
+          product: item._id || item.id,
+          name: item.name,
+          qty: item.quantity,
+          image: item.image,
+          price: item.price,
+        })),
+        totalPrice: total,
         currency: 'INR',
         paymentInfo: paymentResult,
         status: 'paid',

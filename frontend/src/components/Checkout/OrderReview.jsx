@@ -20,7 +20,7 @@ const OrderReview = ({ shippingData, cartItems = [], onEditAddress }) => {
           <h3 className="font-semibold text-gray-900 mb-2">Shipping details</h3>
           {shippingData ? (
             <div className="space-y-1 text-sm">
-              <p>{shippingData.street}</p>
+              <p>{shippingData.houseInfo ? `${shippingData.houseInfo}, ${shippingData.street}` : shippingData.street}</p>
               <p>{shippingData.city}, {shippingData.state} {shippingData.zipCode}</p>
               <p>{shippingData.phone}</p>
             </div>

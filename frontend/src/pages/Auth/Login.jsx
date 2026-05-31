@@ -19,8 +19,7 @@ const Login = () => {
     try {
       await login(email, password);
       showNotification('Signed in successfully', 'success');
-      // Using navigate to homepage without full page reload is better handled by AuthContext,
-      // but let's assume it automatically navigates on state change.
+      navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     }
