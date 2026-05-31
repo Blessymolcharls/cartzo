@@ -1,12 +1,12 @@
 const ErrorMessage = ({ message, onRetry }) => {
   return (
-    <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4">
-      <p className="font-semibold">✗ Error</p>
+    <div className="rounded-xl border bg-[var(--error-bg)] p-4 text-[var(--error-text)] border-[var(--error-border)]">
+      <p className="font-semibold">X Error</p>
       <p className="text-sm mt-2">{message || 'Something went wrong. Please try again.'}</p>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+          className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-white transition hover:bg-red-700"
         >
           Retry
         </button>

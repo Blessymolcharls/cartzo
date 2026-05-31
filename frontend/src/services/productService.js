@@ -21,36 +21,7 @@ const getFallbackProducts = () => {
 };
 
 const getFallbackProduct = (id) => {
-  return getFallbackProducts().find((product) => product._id === id || product.id === id);
-};
-
-const createLocalProduct = (data) => {
-  const timestampId = `local-${Date.now()}`;
-  const product = {
-    ...data,
-    _id: data._id || data.id || timestampId,
-    id: data.id || timestampId,
-  };
-  const products = [...loadLocalProducts(), product];
-  saveLocalProducts(products);
-  return product;
-};
-
-const updateLocalProduct = (id, data) => {
-  const products = loadLocalProducts();
-  const updated = products.map((product) =>
-    product._id === id || product.id === id
-      ? { ...product, ...data, _id: id, id }
-      : product
-  );
-  saveLocalProducts(updated);
-  return updated.find((product) => product._id === id || product.id === id);
-};
-
-const deleteLocalProduct = (id) => {
-  const products = loadLocalProducts().filter((product) => product._id !== id && product.id !== id);
-  saveLocalProducts(products);
-  return products;
+  return getFallbackProducts().find((product) => product._id === id || product.slug === id || product.id === id);
 };
 
 const fallbackIfOffline = async (promise, fallback) => {
@@ -65,9 +36,13 @@ const fallbackIfOffline = async (promise, fallback) => {
 };
 
 export const productService = {
-  getAll: () => fallbackIfOffline(apiService.get('/products'), getFallbackProducts),
+  getAll: (params) => fallbackIfOffline(apiService.get('/products', { params }), getFallbackProducts),
+  getFeatured: () => fallbackIfOffline(apiService.get('/products/featured'), () => getFallbackProducts().slice(0, 5)),
+  getBestsellers: () => fallbackIfOffline(apiService.get('/products/bestsellers'), () => getFallbackProducts().slice(0, 5)),
+  getNewArrivals: () => fallbackIfOffline(apiService.get('/products/new-arrivals'), () => getFallbackProducts().slice(0, 5)),
   getById: (id) => fallbackIfOffline(apiService.get(`/products/${id}`), () => getFallbackProduct(id)),
-  create: (data) => fallbackIfOffline(apiService.post('/products', data), () => createLocalProduct(data)),
-  update: (id, data) => fallbackIfOffline(apiService.put(`/products/${id}`, data), () => updateLocalProduct(id, data)),
-  delete: (id) => fallbackIfOffline(apiService.delete(`/products/${id}`), () => deleteLocalProduct(id)),
+  
+  create: (data) => apiService.post('/products', data),
+  update: (id, data) => apiService.put(`/products/${id}`, data),
+  delete: (id) => apiService.delete(`/products/${id}`),
 };
