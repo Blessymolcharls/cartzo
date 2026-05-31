@@ -12,6 +12,7 @@ env/
 
 # Production builds
 /build
+build/
 /dist
 *.jar
 *.war
