@@ -22,7 +22,7 @@ const CartItem = ({ item }) => {
             <button type="button" onClick={() => updateQuantity(productId, Math.max(item.quantity - 1, 1))} className="rounded-full bg-white p-2 text-gray-700 hover:bg-gray-200">
               -
             </button>
-            <span className="font-semibold">{item.quantity}</span>
+            <span className="font-semibold text-gray-900">{item.quantity}</span>
             <button type="button" onClick={() => updateQuantity(productId, item.quantity + 1)} className="rounded-full bg-white p-2 text-gray-700 hover:bg-gray-200">
               +
             </button>
