@@ -7,7 +7,12 @@ import dns from 'dns';
 dotenv.config();
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
-const mongo_url = process.env.MONGO_URI || "mongodb+srv://blessymolcharls_db_user:8UOkUCv9EL8DmZpF@cluster0.3htapmv.mongodb.net/?appName=Cluster0";
+const mongo_url = process.env.MONGO_URI;
+
+if (!mongo_url) {
+  console.error('Missing MONGO_URI in environment. Set it in backend/.env.');
+  process.exit(1);
+}
 
 const seedAdmin = async () => {
   try {
