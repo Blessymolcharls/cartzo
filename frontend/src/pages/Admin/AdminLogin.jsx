@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from '../../hooks/useAuth';
 import { useNotification } from '../../context/NotificationContext';
 import ErrorMessage from '../../components/Common/ErrorMessage';
-import { STORAGE_KEYS } from '../../utils/constants';
 
 const AdminLogin = () => {
-  const { setUser } = useAuth();
+  const { adminLogin } = useAuth();
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [email, setEmail] = useState('');
@@ -21,16 +19,11 @@ const AdminLogin = () => {
     setError(null);
     setIsLoading(true);
     try {
-      const response = await axios.post('/api/auth/admin/login', { email, password });
-      const { token, user } = response.data;
-      
-      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-      setUser(user);
-      
+      await adminLogin(email, password);
       showNotification('Admin authenticated successfully', 'success');
       navigate('/admin/dashboard');
     } catch (err) {
+      console.error('[AdminLogin] Login failed:', err.response?.data || err.message, err);
       setError(err.response?.data?.message || 'Admin login failed');
     } finally {
       setIsLoading(false);

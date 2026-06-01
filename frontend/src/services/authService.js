@@ -3,6 +3,7 @@ import apiService from './apiService';
 export const authService = {
   register: (data) => apiService.post('/auth/register', data),
   login: (data) => apiService.post('/auth/login', data),
+  adminLogin: (data) => apiService.post('/auth/admin/login', data),
   logout: () => {
     localStorage.removeItem('jwt_token');
     return Promise.resolve();

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import apiService from '../../services/apiService';
 import { useNotification } from '../../context/NotificationContext';
 
 const AdminProductForm = () => {
@@ -27,7 +27,7 @@ const AdminProductForm = () => {
     if (isEdit) {
       const fetchProduct = async () => {
         try {
-          const { data } = await axios.get(`/api/products/${id}`);
+          const { data } = await apiService.get(`/products/${id}`);
           setFormData({
             name: data.name,
             description: data.description,
@@ -66,13 +66,9 @@ const AdminProductForm = () => {
     setUploading(true);
 
     try {
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      };
-
-      const { data } = await axios.post('/api/upload', form, config);
+      const { data } = await apiService.post('/upload', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       setFormData(prev => ({ ...prev, image: data }));
       showNotification('Image uploaded successfully', 'success');
     } catch (error) {
@@ -92,15 +88,11 @@ const AdminProductForm = () => {
     }
 
     try {
-      const config = {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      };
-
       if (isEdit) {
-        await axios.put(`/api/products/${id}`, formData, config);
+        await apiService.put(`/products/${id}`, formData);
         showNotification('Product updated successfully', 'success');
       } else {
-        await axios.post('/api/products', formData, config);
+        await apiService.post('/products', formData);
         showNotification('Product created successfully', 'success');
       }
       navigate('/admin/products');

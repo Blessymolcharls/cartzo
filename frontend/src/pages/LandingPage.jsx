@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { productService } from '../services/productService';
-import ProductCard from '../components/Product/ProductCard';
 
 const particles = [
   { top: '12%', left: '18%', width: '3px', height: '3px', animationDelay: '0s', animationDuration: '12s' },
@@ -17,67 +15,6 @@ const particles = [
 ];
 
 function LandingPage() {
-  const [featured, setFeatured] = useState([]);
-  const [bestsellers, setBestsellers] = useState([]);
-  const [newArrivals, setNewArrivals] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [featRes, bestRes, newRes] = await Promise.all([
-          productService.getFeatured(),
-          productService.getBestsellers(),
-          productService.getNewArrivals()
-        ]);
-        setFeatured(featRes.data || []);
-        setBestsellers(bestRes.data || []);
-        setNewArrivals(newRes.data || []);
-      } catch (error) {
-        console.error('Error fetching landing page products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  const renderSection = (title, subtitle, products) => {
-    if (products.length === 0 && !loading) return null;
-
-    return (
-      <section className="py-20 border-t border-[var(--border-subtle)] relative z-10 w-full">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-end mb-10">
-            <div>
-              <h2 className="text-3xl font-bold text-[var(--text-main)] font-['Montserrat'] tracking-wide">{title}</h2>
-              <p className="text-[var(--text-muted)] mt-2">{subtitle}</p>
-            </div>
-            <Link to="/shop" className="hidden md:flex items-center gap-2 text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors font-medium">
-              View All <span aria-hidden="true">&rarr;</span>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {loading ? (
-              [...Array(4)].map((_, i) => (
-                <div key={i} className="animate-pulse bg-[var(--glass-bg)] border border-[var(--border-subtle)] rounded-2xl h-[400px]"></div>
-              ))
-            ) : (
-              products.map(product => <ProductCard key={product._id || product.id} product={product} />)
-            )}
-          </div>
-          
-          <div className="mt-8 text-center md:hidden">
-            <Link to="/shop" className="inline-flex items-center justify-center rounded-full border border-[var(--border-subtle)] px-6 py-3 text-[var(--text-main)] hover:bg-[var(--glass-bg)] transition-colors w-full">
-              View All Products
-            </Link>
-          </div>
-        </div>
-      </section>
-    );
-  };
-
   return (
     <div className="landing-page">
       <div className="landing-background">
@@ -107,17 +44,10 @@ function LandingPage() {
             <Link className="landing-cta-btn landing-cta-primary" to="/shop">
               Start Shopping
             </Link>
-            <Link className="landing-cta-btn landing-cta-secondary" to="/shop">
-              Explore Products
-            </Link>
           </div>
         </div>
       </header>
 
-      {renderSection("Featured Products", "Curated selection of our finest items.", featured)}
-      {renderSection("New Arrivals", "The latest additions to our inventory.", newArrivals)}
-      {renderSection("Best Sellers", "Our most popular products, loved by customers.", bestsellers)}
-      
       <footer className="w-full py-10 border-t border-[var(--border-subtle)] text-center text-[var(--text-muted)] relative z-10 bg-[var(--bg-darker)]">
         <p>&copy; 2026 Cartzo. Built for modern commerce.</p>
       </footer>

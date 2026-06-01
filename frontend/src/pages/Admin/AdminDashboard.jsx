@@ -1,67 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '../../hooks/useAuth';
+import apiService from '../../services/apiService';
 
-const StatCard = ({ title, value, icon, color }) => (
-  <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
-    <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full blur-2xl opacity-20 group-hover:opacity-30 transition-opacity ${color}`}></div>
-    <div className="flex items-center justify-between mb-4 relative z-10">
-      <h3 className="text-gray-400 font-medium">{title}</h3>
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-white/5 ${color.replace('bg-', 'text-')}`}>
-        {icon}
-      </div>
-    </div>
-    <div className="text-3xl font-bold text-white relative z-10">{value}</div>
+const StatCard = ({ title, value, sub }) => (
+  <div className="bg-[#0f0f0f] border border-white/8 rounded-xl p-5">
+    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">{title}</p>
+    <p className="text-3xl font-bold text-white">{value}</p>
+    {sub && <p className="text-xs text-gray-500 mt-1">{sub}</p>}
   </div>
 );
 
+const statusStyle = (status) => {
+  switch (status) {
+    case 'Delivered': return 'bg-green-500/10 text-green-400 border border-green-500/20';
+    case 'Shipped':   return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+    case 'Cancelled': return 'bg-red-500/10 text-red-400 border border-red-500/20';
+    default:          return 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20';
+  }
+};
+
 const AdminDashboard = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState({
-    totalProducts: 0,
-    totalOrders: 0,
-    totalUsers: 0,
-    revenue: 0,
-  });
+  const [stats, setStats] = useState({ totalProducts: 0, totalOrders: 0, totalUsers: 0, revenue: 0 });
   const [recentOrders, setRecentOrders] = useState([]);
   const [lowStock, setLowStock] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const config = {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        };
-        
-        // Fetch products, orders, and users in parallel
         const [productsRes, ordersRes, usersRes] = await Promise.all([
-          axios.get('/api/products?pageSize=1000', config),
-          axios.get('/api/orders', config),
-          axios.get('/api/auth/users', config)
+          apiService.get('/products?pageSize=1000'),
+          apiService.get('/orders'),
+          apiService.get('/auth/users'),
         ]);
 
-        const products = productsRes.data.products || productsRes.data;
-        const orders = ordersRes.data;
-        const users = usersRes.data;
+        const products = productsRes.data.products || productsRes.data || [];
+        const orders   = ordersRes.data || [];
+        const users    = usersRes.data || [];
 
-        // Calculate Revenue
-        const revenue = orders.reduce((acc, order) => acc + (order.isPaid ? order.totalPrice : 0), 0);
+        const revenue = orders.reduce((acc, o) => acc + (o.totalPrice || 0), 0);
 
         setStats({
           totalProducts: products.length,
-          totalOrders: orders.length,
-          totalUsers: users.length,
-          revenue: revenue.toFixed(2),
+          totalOrders:   orders.length,
+          totalUsers:    users.length,
+          revenue:       revenue.toFixed(2),
         });
 
-        setRecentOrders(orders.slice(0, 5));
-        
-        // Find Low Stock (less than 10)
-        setLowStock(products.filter(p => p.stock < 10).slice(0, 5));
-
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        setRecentOrders(orders.slice(0, 6));
+        setLowStock(products.filter(p => p.stock < 10).slice(0, 6));
+      } catch (err) {
+        console.error('Dashboard fetch error:', err);
+        setError('Failed to load dashboard data.');
       } finally {
         setLoading(false);
       }
@@ -70,93 +62,91 @@ const AdminDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  if (loading) {
-    return <div className="text-center text-gray-400 py-10">Loading dashboard data...</div>;
-  }
+  if (loading) return <div className="text-gray-500 text-sm py-10 text-center">Loading dashboard...</div>;
+  if (error)   return <div className="text-red-400 text-sm py-10 text-center">{error}</div>;
 
   return (
-    <div className="space-y-8 animate-[fadeIn_0.5s_ease-out]">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Dashboard Overview</h1>
-        <p className="text-gray-400">Welcome back, {user?.name}. Here's what's happening in your store.</p>
+        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+        <p className="text-sm text-gray-500 mt-0.5">Welcome back, {user?.name}.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Revenue" value={`$${stats.revenue}`} icon="💰" color="bg-green-500" />
-        <StatCard title="Total Orders" value={stats.totalOrders} icon="🛒" color="bg-blue-500" />
-        <StatCard title="Total Products" value={stats.totalProducts} icon="📦" color="bg-purple-500" />
-        <StatCard title="Total Users" value={stats.totalUsers} icon="👥" color="bg-[var(--primary)]" />
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard title="Total Revenue"  value={`₹${stats.revenue}`} />
+        <StatCard title="Total Orders"   value={stats.totalOrders} />
+        <StatCard title="Total Products" value={stats.totalProducts} />
+        <StatCard title="Total Users"    value={stats.totalUsers} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Recent Orders */}
-        <div className="lg:col-span-2 bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 shadow-xl">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-white">Recent Orders</h2>
+        <div className="lg:col-span-2 bg-[#0f0f0f] border border-white/8 rounded-xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-white/8">
+            <h2 className="text-sm font-semibold text-white">Recent Orders</h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-sm text-left">
               <thead>
-                <tr className="border-b border-white/10 text-gray-400 text-sm">
-                  <th className="pb-3 font-medium">Order ID</th>
-                  <th className="pb-3 font-medium">Customer</th>
-                  <th className="pb-3 font-medium">Date</th>
-                  <th className="pb-3 font-medium">Status</th>
-                  <th className="pb-3 font-medium text-right">Total</th>
+                <tr className="border-b border-white/8 text-gray-500 text-xs uppercase tracking-wider">
+                  <th className="px-5 py-3 font-medium">ID</th>
+                  <th className="px-5 py-3 font-medium">Customer</th>
+                  <th className="px-5 py-3 font-medium">Date</th>
+                  <th className="px-5 py-3 font-medium">Status</th>
+                  <th className="px-5 py-3 font-medium text-right">Total</th>
                 </tr>
               </thead>
-              <tbody className="text-sm">
+              <tbody>
                 {recentOrders.length === 0 ? (
-                  <tr><td colSpan="5" className="py-4 text-center text-gray-500">No recent orders</td></tr>
-                ) : (
-                  recentOrders.map(order => (
-                    <tr key={order._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                      <td className="py-4 text-[var(--primary)]">#{order._id.substring(18)}</td>
-                      <td className="py-4 text-white">{order.user?.name || 'Guest'}</td>
-                      <td className="py-4 text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</td>
-                      <td className="py-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          order.orderStatus === 'Delivered' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 
-                          order.orderStatus === 'Shipped' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                          'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
-                        }`}>
-                          {order.orderStatus}
-                        </span>
-                      </td>
-                      <td className="py-4 text-right font-medium text-white">${order.totalPrice.toFixed(2)}</td>
-                    </tr>
-                  ))
-                )}
+                  <tr><td colSpan="5" className="px-5 py-6 text-center text-gray-600">No orders yet</td></tr>
+                ) : recentOrders.map(order => (
+                  <tr key={order._id} className="border-b border-white/5 hover:bg-white/3 transition-colors">
+                    <td className="px-5 py-3.5 text-[var(--primary)] font-mono text-xs">#{order._id.slice(-8).toUpperCase()}</td>
+                    <td className="px-5 py-3.5 text-white">{order.user?.name || 'Guest'}</td>
+                    <td className="px-5 py-3.5 text-gray-400">{new Date(order.createdAt).toLocaleDateString('en-IN')}</td>
+                    <td className="px-5 py-3.5">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusStyle(order.orderStatus)}`}>
+                        {order.orderStatus || 'Pending'}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-right text-white font-medium">₹{(order.totalPrice || 0).toFixed(2)}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Low Stock Alerts */}
-        <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 shadow-xl">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-white">Low Stock Alerts</h2>
-            <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-1 rounded-lg text-xs font-bold">{lowStock.length}</span>
+        {/* Low Stock */}
+        <div className="bg-[#0f0f0f] border border-white/8 rounded-xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-white/8 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-white">Low Stock</h2>
+            {lowStock.length > 0 && (
+              <span className="text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
+                {lowStock.length}
+              </span>
+            )}
           </div>
-          <div className="space-y-4">
+          <div className="divide-y divide-white/5">
             {lowStock.length === 0 ? (
-              <p className="text-gray-500 text-sm text-center py-4">All products are well stocked.</p>
-            ) : (
-              lowStock.map(product => (
-                <div key={product._id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <img src={product.image || '/placeholder.png'} alt={product.name} className="w-10 h-10 rounded-lg object-cover bg-black" />
-                    <div>
-                      <h4 className="text-sm font-medium text-white line-clamp-1">{product.name}</h4>
-                      <p className="text-xs text-gray-400">{product.category}</p>
-                    </div>
-                  </div>
-                  <div className={`text-sm font-bold ${product.stock === 0 ? 'text-red-500' : 'text-yellow-500'}`}>
-                    {product.stock} left
+              <p className="text-gray-600 text-sm text-center py-6">All products are well stocked.</p>
+            ) : lowStock.map(product => (
+              <div key={product._id} className="flex items-center justify-between px-5 py-3 hover:bg-white/3 transition-colors">
+                <div className="flex items-center gap-3 min-w-0">
+                  {product.image && (
+                    <img src={product.image} alt={product.name} className="w-8 h-8 rounded-lg object-cover bg-black flex-shrink-0" />
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-sm text-white truncate">{product.name}</p>
+                    <p className="text-xs text-gray-500">{product.category}</p>
                   </div>
                 </div>
-              ))
-            )}
+                <span className={`text-sm font-bold flex-shrink-0 ml-3 ${product.stock === 0 ? 'text-red-400' : 'text-yellow-400'}`}>
+                  {product.stock}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

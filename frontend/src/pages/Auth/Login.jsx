@@ -19,7 +19,7 @@ const Login = () => {
     try {
       await login(email, password);
       showNotification('Signed in successfully', 'success');
-      navigate('/');
+      navigate('/shop');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     }

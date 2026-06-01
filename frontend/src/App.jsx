@@ -28,6 +28,8 @@ import AdminLogin from './pages/Admin/AdminLogin';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminProducts from './pages/Admin/AdminProducts';
 import AdminProductForm from './pages/Admin/AdminProductForm';
+import AdminOrders from './pages/Admin/AdminOrders';
+import AdminUsers from './pages/Admin/AdminUsers';
 
 import './App.css';
 
@@ -48,10 +50,8 @@ function App() {
                 <Route path="products" element={<AdminProducts />} />
                 <Route path="products/new" element={<AdminProductForm />} />
                 <Route path="products/:id/edit" element={<AdminProductForm />} />
-                {/* Fallback routes for unimplemented pages */}
-                <Route path="orders" element={<div className="text-white">Orders module coming soon</div>} />
-                <Route path="users" element={<div className="text-white">Users module coming soon</div>} />
-                <Route path="settings" element={<div className="text-white">Settings module coming soon</div>} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="users" element={<AdminUsers />} />
               </Route>
 
               {/* Main Storefront Routes */}

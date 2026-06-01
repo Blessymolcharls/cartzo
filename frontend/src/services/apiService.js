@@ -18,11 +18,23 @@ apiService.interceptors.request.use((config) => {
 apiService.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect to login
+    const url = error.config?.url || '';
+    const status = error.response?.status;
+    const message = error.response?.data?.message || error.message;
+
+    // Always log errors to console for debugging
+    console.error(`[API Error] ${error.config?.method?.toUpperCase()} ${url} → ${status}: ${message}`);
+
+    // Don't intercept login/register endpoints — they return 401 for bad credentials
+    // and the component catch block needs to handle that to show the error message
+    const isAuthEndpoint = url.includes('/login') || url.includes('/register');
+
+    if (status === 401 && !isAuthEndpoint) {
       localStorage.removeItem('jwt_token');
-      window.location.href = '/login';
+      const isAdminRoute = url.includes('/admin');
+      window.location.href = isAdminRoute ? '/admin/login' : '/login';
     }
+
     return Promise.reject(error);
   }
 );

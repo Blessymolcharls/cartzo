@@ -28,7 +28,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const register = useCallback(async (email, password, name) => {
-    setLoading(true);
     setError(null);
     try {
       const response = await authService.register({ email, password, name });
@@ -39,13 +38,10 @@ export const AuthProvider = ({ children }) => {
       const message = err.response?.data?.message || 'Registration failed';
       setError(message);
       throw err;
-    } finally {
-      setLoading(false);
     }
   }, []);
 
   const login = useCallback(async (email, password) => {
-    setLoading(true);
     setError(null);
     try {
       const response = await authService.login({ email, password });
@@ -56,8 +52,20 @@ export const AuthProvider = ({ children }) => {
       const message = err.response?.data?.message || 'Login failed';
       setError(message);
       throw err;
-    } finally {
-      setLoading(false);
+    }
+  }, []);
+
+  const adminLogin = useCallback(async (email, password) => {
+    setError(null);
+    try {
+      const response = await authService.adminLogin({ email, password });
+      localStorage.setItem(STORAGE_KEYS.JWT_TOKEN, response.data.token);
+      setUser(response.data.user);
+      return response.data;
+    } catch (err) {
+      const message = err.response?.data?.message || 'Admin login failed';
+      setError(message);
+      throw err;
     }
   }, []);
 
@@ -72,7 +80,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const updateProfile = useCallback(async (data) => {
-    setLoading(true);
     setError(null);
     try {
       const response = await authService.updateProfile(data);
@@ -82,12 +89,10 @@ export const AuthProvider = ({ children }) => {
       const message = err.response?.data?.message || 'Update failed';
       setError(message);
       throw err;
-    } finally {
-      setLoading(false);
     }
   }, []);
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.isAdmin === true;
 
   const value = {
     user,
@@ -95,6 +100,7 @@ export const AuthProvider = ({ children }) => {
     error,
     register,
     login,
+    adminLogin,
     logout,
     updateProfile,
     isAuthenticated: !!user,

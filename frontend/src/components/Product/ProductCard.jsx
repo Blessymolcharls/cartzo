@@ -86,7 +86,7 @@ const ProductCard = ({ product }) => {
             </button>
             <Link 
               to={`/products/${product._id || product.slug}`} 
-              className="h-11 rounded-lg font-semibold bg-transparent border border-white/20 text-white flex items-center justify-center transition-all duration-300 hover:border-white/60 hover:bg-white/5 active:scale-95"
+              className="h-11 rounded-lg font-semibold bg-transparent border border-[var(--border-subtle)] text-[var(--text-main)] flex items-center justify-center transition-all duration-300 hover:border-[var(--primary)] hover:text-[var(--primary)] active:scale-95"
             >
               View
             </Link>
